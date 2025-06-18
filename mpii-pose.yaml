@@ -1,0 +1,12 @@
+# MPII dataset configuration for YOLOv8 Pose
+path: C:\Users\lijia\Documents\GitHub\HumanTrack\mpii  # dataset root dir
+train: C:\Users\lijia\Documents\GitHub\HumanTrack\mpii\train/images  # train images
+val: C:\Users\lijia\Documents\GitHub\HumanTrack\mpii\val/images  # val images
+
+# Keypoints
+kpt_shape: [16, 3]  # number of keypoints, number of dims (2 for x,y or 3 for x,y,visibility)
+flip_idx: [5, 4, 3, 2, 1, 0, 6, 7, 8, 9, 15, 14, 13, 12, 11, 10]  # keypoint flip index (left-right swaps)
+
+# Classes
+names:
+  0: person

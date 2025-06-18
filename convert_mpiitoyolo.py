@@ -1,5 +1,6 @@
 import os
 import cv2
+import shutil
 import scipy.io
 import numpy as np
 from tqdm import tqdm
@@ -96,32 +97,55 @@ def process_dataset(indices, output_dir, set_name):
     """处理数据集子集（训练集或验证集）"""
     print(f"Processing {set_name} set with {len(indices)} images...")
     
-    # 创建图像和标签目录的符号链接（避免复制图像）
-    if not os.path.exists(os.path.join(output_dir, 'images')):
-        os.symlink(os.path.abspath(image_dir), os.path.join(output_dir, 'images'))
+    # 创建输出目录
+    output_images_dir = os.path.join(output_dir, 'images')
+    output_labels_dir = os.path.join(output_dir, 'labels')
+    os.makedirs(output_images_dir, exist_ok=True)
+    os.makedirs(output_labels_dir, exist_ok=True)
     
-    for idx in tqdm(indices, desc=set_name):
+    # 进度条设置
+    progress_bar = tqdm(indices, desc=set_name)
+    
+    for idx in progress_bar:
         anno = annolist[idx]
         image_name = anno.image.name
         img_path = os.path.join(image_dir, image_name)
         
+        # 更新进度条描述
+        progress_bar.set_postfix({"Image": image_name[:20] + '...' if len(image_name) > 20 else image_name})
+        
         if not os.path.exists(img_path):
+            print(f"\nWarning: Image not found - {img_path}")
             continue
         
-        # 读取图像尺寸
-        img = cv2.imread(img_path)
-        img_height, img_width = img.shape[:2]
+        try:
+            # 复制图像到目标目录
+            dst_img_path = os.path.join(output_images_dir, image_name)
+            if not os.path.exists(dst_img_path):
+                shutil.copy2(img_path, dst_img_path)
+            
+            # 读取图像尺寸
+            img = cv2.imread(img_path)
+            if img is None:
+                raise IOError(f"Failed to read image: {img_path}")
+                
+            img_height, img_width = img.shape[:2]
+            
+            # 处理标注
+            lines = process_annotation(anno, img_width, img_height)
+            
+            # 写入标签文件
+            label_name = os.path.splitext(image_name)[0] + '.txt'
+            label_path = os.path.join(output_labels_dir, label_name)
+            with open(label_path, 'w') as f:
+                for line in lines:
+                    # 将浮点数格式化为6位小数，整数保持不变
+                    line_str = ' '.join([f'{x:.6f}' if isinstance(x, float) else str(int(x)) for x in line])
+                    f.write(line_str + '\n')
         
-        # 处理标注
-        lines = process_annotation(anno, img_width, img_height)
-        
-        # 写入标签文件
-        label_path = os.path.join(output_dir, 'labels', os.path.splitext(image_name)[0] + '.txt')
-        with open(label_path, 'w') as f:
-            for line in lines:
-                # 将浮点数格式化为6位小数，整数保持不变
-                line_str = ' '.join([f'{x:.6f}' if isinstance(x, float) else str(int(x)) for x in line])
-                f.write(line_str + '\n')
+        except Exception as e:
+            print(f"\nError processing {image_name}: {str(e)}")
+            continue
 
 # 处理训练集和验证集
 process_dataset(train_indices, output_train_dir, "Training")
@@ -143,14 +167,19 @@ names:
   0: person
 """
 
-    with open('mpii-pose.yaml', 'w') as f:
+    config_path = 'mpii-pose.yaml'
+    with open(config_path, 'w') as f:
         f.write(yaml_content)
-    print("Dataset configuration file created: mpii-pose.yaml")
+    print(f"\nDataset configuration file created: {os.path.abspath(config_path)}")
 
 # 创建YAML配置文件
 create_yaml_config()
 
-print("Dataset conversion completed successfully!")
+# 数据集统计
+print("\nDataset conversion completed successfully!")
 print(f"Training set size: {len(train_indices)} images")
 print(f"Validation set size: {len(val_indices)} images")
-print(f"Output directories:\n- {output_train_dir}\n- {output_val_dir}")
+print(f"Output directories:")
+print(f"- Training: {os.path.abspath(output_train_dir)}")
+print(f"- Validation: {os.path.abspath(output_val_dir)}")
+print(f"Total images processed: {len(train_indices) + len(val_indices)}")

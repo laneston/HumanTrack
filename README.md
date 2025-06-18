@@ -9,8 +9,8 @@
 ## Dependencies
 
 
-the torch [download link is here](https://download.pytorch.org/whl/torch_stable.html)
-
+the torch [download link is here](https://download.pytorch.org/whl/torch/)
+the torchvision [download link is here](https://download.pytorch.org/whl/torchvision/)
 
 ```
 torch==torch-2.3.1 cu118-cp39-cp39-win_amd64.whl
@@ -42,6 +42,8 @@ The installation instructions are as follows.
 - requests, `pip install requests`
 - pandas,`pip install pandas`
 - huggingface_hub, `pip install huggingface_hub`
+- scipy, `pip install scipy`
+- matplotlib, `pip install matplotlib`
 
 ## Tree
 

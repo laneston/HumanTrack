@@ -16,17 +16,18 @@ else:
 
 try:
     from ultralytics import YOLO
+    from deep_sort_realtime.deepsort_tracker import DeepSort
 
 except ImportError as e:
     print(f"Import failed: {e}")
 
 
-from deep_sort_realtime.deepsort_tracker import DeepSort
+
 import cv2
 
 
 # 初始化模型和追踪器
-model = YOLO("models/yolov11n.pt")  # 请确保已下载权重文件
+model = YOLO("yolo11n.pt")  # 请确保已下载权重文件
 tracker = DeepSort(max_age=5)  # 创建DeepSort追踪器
 
 # 打开摄像头
