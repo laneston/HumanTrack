@@ -59,8 +59,8 @@ The installation instructions are as follows.
 ├── mpii*
 │   ├── images*
 │   ├── mpii_human_pose_v1_u12_1.mat*
-│   ├── train*
-│   └── val*
+│   ├── train
+│   └── val
 └── ultralytics
 ```
 
@@ -69,3 +69,8 @@ The installation instructions are as follows.
  ## Usage
 
 Enter the app directory by `cd app` and execute instructions `python videocapture.py`.
+
+## 数据集
+
+
+[You can download the images and annotations from the MPII Human Pose benchmark here:](https://www.mpi-inf.mpg.de/departments/computer-vision-and-machine-learning/software-and-datasets/mpii-human-pose-dataset/download)
